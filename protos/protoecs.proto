@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package protos;
+
+option go_package = "github.com/mfield4/go_entity_component_services/protos";
+
+import "google/protobuf/empty.proto";
+
+import "components.proto";
+
+
+/*
+
+
+Game {
+ opengl context
+ glfw context
+
+  GameState {}
+  GameWorld {}
+
+  Systems {]
+}
+
+
+*/
+
+
+/*
+It is still unclear whether it is preferable to have a map to list of components in this context
+For now it shall be lists
+*/
+message GameState {
+  repeated Position positions = 1;
+  repeated Momentum momentum = 2;
+}
+
+// The map
+// This particular message can and will be used for saving and loading from file
+message GameWorld {
+  // Some sort of list of chunks?
+
+}
