@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"go_entity_component_services/pkg/data"
 	"go_entity_component_services/pkg/systems"
-	"go_entity_component_services/protos"
 	"log"
 	"strings"
 )
@@ -25,11 +25,12 @@ const (
 type Game struct {
 	window *glfw.Window
 
-	// currentScene *Scene
-	// nextScene *Scene
+	positions []data.Position
+	momentums []data.Momentum
 
-	gameState *protos.GameState
-	gameWorld *protos.GameWorld
+	camera []data.Camera
+
+	// gameWorld *protos.GameWorld
 
 	// Systems??
 	inputs    []systems.InputSystem
@@ -40,22 +41,26 @@ type Game struct {
 func NewGame(width, height int) *Game {
 	// init opengl and stuffs
 	g := &Game{
-		window:    initGlfw(width, height),
-		gameState: &protos.GameState{},
-		gameWorld: &protos.GameWorld{},
+		window: initGlfw(width, height),
+		// gameState: &protos.GameState{},
+		// gameWorld: &protos.GameWorld{},
 	}
-
-	chunkRenderer := systems.NewChunkRenderer()
-	skyboxRenderer := systems.NewSkyboxRenderer()
-	cameraSys := systems.NewCameraSystem()
+	// inputs
 	glfwInput := systems.NewGlfwInput(g.window)
 
-	glfwInput.AddMouseListeners(cameraSys.MouseCommand)
+	chunkManager := systems.NewChunkManager()
+
+	cameraSys := systems.NewCameraSystem(g.camera)
+	// rendering stuff
+	chunkRenderer := systems.NewChunkRenderer()
+	// skyboxRenderer := systems.NewSkyboxRenderer()
+
+	glfwInput.AddMouseMotionListeners(cameraSys.MouseMotionCommand)
 	glfwInput.AddKeyListeners(cameraSys.KeyCommand)
 
-	g.addInputSystems(glfwInput)
-	g.addAsyncSystems(cameraSys)
-	g.addRenderSystems(chunkRenderer, skyboxRenderer)
+	g.addInputSystems(glfwInput, chunkManager)
+	g.addAsyncSystems(chunkManager)
+	g.addRenderSystems(chunkRenderer)
 	return g
 }
 
@@ -71,7 +76,7 @@ func (g *Game) IsRunning() bool {
 // Start async systems
 func (g *Game) Start() {
 	for _, sys := range g.asyncs {
-		go sys.Start()
+		go systems.AsyncStart(sys)
 	}
 }
 
@@ -86,7 +91,7 @@ func (g *Game) Update() {
 func (g *Game) Draw() {
 
 	for _, sys := range g.renderers {
-		// DO TIME STUFF MANG
+		// TODO DO TIME STUFF MANG
 		sys.Render(0)
 	}
 }

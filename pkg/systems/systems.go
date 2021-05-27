@@ -6,9 +6,14 @@ type InputSystem interface {
 }
 
 type AsyncSystem interface {
-	Start()
-	Step(dt float32)
+	Step(dt float32) bool
 	Stop()
+}
+
+func AsyncStart(sys AsyncSystem) {
+	// TODO ADD TIMING THING
+	for sys.Step(0) {
+	}
 }
 
 type RenderSystem interface {
