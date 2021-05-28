@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"go_entity_component_services/pkg/data"
+	"go_entity_component_services/pkg/components"
 	"go_entity_component_services/pkg/systems"
 	"log"
 	"strings"
@@ -25,10 +25,10 @@ const (
 type Game struct {
 	window *glfw.Window
 
-	positions []data.Position
-	momentums []data.Momentum
+	positions []components.Position
+	momentums []components.Momentum
 
-	camera []data.Camera
+	camera []components.Camera
 
 	// gameWorld *protos.GameWorld
 
@@ -45,6 +45,7 @@ func NewGame(width, height int) *Game {
 		// gameState: &protos.GameState{},
 		// gameWorld: &protos.GameWorld{},
 	}
+	initOpenGL()
 	// inputs
 	glfwInput := systems.NewGlfwInput(g.window)
 
@@ -135,45 +136,16 @@ func initGlfw(width, height int) *glfw.Window {
 }
 
 // initOpenGL initializes OpenGL and returns an intiialized program.
-func initOpenGL() uint32 {
+func initOpenGL() {
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Println("OpenGL version", version)
-
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		panic(err)
-	}
-
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		panic(err)
-	}
-
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(prog)
-	return prog
-}
-
-// makeVao initializes and returns a vertex array from the points provided.
-func makeVao(points []float32) uint32 {
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
-
-	var vao uint32
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
-	gl.EnableVertexAttribArray(0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
-
-	return vao
+	// Configure global settings
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LESS)
+	gl.ClearColor(1.0, 1.0, 1.0, 1.0)
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {

@@ -1,31 +1,10 @@
-package data
+package components
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
 	"math"
 )
-
-type COMPONENTS byte
-
-const (
-	POSITION COMPONENTS = 1 << iota
-	MOMENTUM
-)
-
-type Entity struct {
-	ID       uint32
-	compMask COMPONENTS
-}
-
-type Position struct {
-	mgl32.Vec3
-}
-
-type Momentum struct {
-	Mass float32
-	Vel  mgl32.Vec3
-}
 
 // Camera is the camera object maintaing the stae
 type Camera struct {

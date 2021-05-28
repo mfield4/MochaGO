@@ -2,23 +2,24 @@ package systems
 
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"go_entity_component_services/pkg/data"
+	"go_entity_component_services/pkg/components"
 )
 
 // Handles basic camera movement and updating the camera with information
 
 type CameraSystem struct {
-	cameras []data.Camera
+	cameras []components.Camera
 	deltaT  float64
+	lastT   float64
 }
 
-func NewCameraSystem(cams []data.Camera) *CameraSystem {
+func NewCameraSystem(cams []components.Camera) *CameraSystem {
 	return &CameraSystem{
 		cameras: cams,
 	}
 }
 
-func (c *CameraSystem) MouseMotionCommand(mouse data.CursorPositionCommand) {
+func (c *CameraSystem) MouseMotionCommand(mouse components.CursorPositionCommand) {
 	cam := &c.cameras[0]
 
 	// update camera vectors
@@ -39,9 +40,12 @@ func (c *CameraSystem) MouseMotionCommand(mouse data.CursorPositionCommand) {
 	cam.UpdateCameraVectors()
 }
 
-func (c *CameraSystem) KeyCommand(key data.KeyCommand) {
+func (c *CameraSystem) KeyCommand(key components.KeyCommand) {
 	cam := &c.cameras[0]
-	velocity := float32(cam.MovementSpeed * c.deltaT)
+	// Update DeltaT
+	currT := glfw.GetTime()
+	velocity := float32(cam.MovementSpeed * (currT - c.lastT))
+	c.deltaT = currT
 	// Edit mouse position based on key command
 	switch key.Key {
 	case glfw.KeyW:

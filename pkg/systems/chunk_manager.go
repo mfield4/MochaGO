@@ -5,12 +5,12 @@ package systems
 type ChunkManager struct {
 }
 
-func (c *ChunkManager) Poll() {
-	panic("implement me")
-}
-
 func NewChunkManager() *ChunkManager {
 	return &ChunkManager{}
+}
+
+func (c *ChunkManager) Poll() {
+	panic("implement me")
 }
 
 func (c *ChunkManager) Step(dt float32) bool {

@@ -2,13 +2,13 @@ package systems
 
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"go_entity_component_services/pkg/data"
+	"go_entity_component_services/pkg/components"
 )
 
 type GlfwInput struct {
-	cursorPositionListeners []func(data.CursorPositionCommand)
-	mouseButtonListeners    []func(data.MouseButtonCommand)
-	keyListeners            []func(data.KeyCommand)
+	cursorPositionListeners []func(components.CursorPositionCommand)
+	mouseButtonListeners    []func(components.MouseButtonCommand)
+	keyListeners            []func(components.KeyCommand)
 }
 
 // This type creates a set of callbacks to communicate between glfw and the rest of the program
@@ -28,19 +28,19 @@ func (g *GlfwInput) Poll() {
 	glfw.PollEvents()
 }
 
-func (g *GlfwInput) AddMouseMotionListeners(funcs ...func(data.CursorPositionCommand)) {
+func (g *GlfwInput) AddMouseMotionListeners(funcs ...func(components.CursorPositionCommand)) {
 	for _, f := range funcs {
 		g.cursorPositionListeners = append(g.cursorPositionListeners, f)
 	}
 }
 
-func (g *GlfwInput) AddMouseButtonListeners(funcs ...func(data.MouseButtonCommand)) {
+func (g *GlfwInput) AddMouseButtonListeners(funcs ...func(components.MouseButtonCommand)) {
 	for _, f := range funcs {
 		g.mouseButtonListeners = append(g.mouseButtonListeners, f)
 	}
 }
 
-func (g *GlfwInput) AddKeyListeners(funcs ...func(data.KeyCommand)) {
+func (g *GlfwInput) AddKeyListeners(funcs ...func(components.KeyCommand)) {
 	for _, f := range funcs {
 		g.keyListeners = append(g.keyListeners, f)
 	}
@@ -50,7 +50,7 @@ func (g *GlfwInput) cursorPositionCallback(window *glfw.Window, xpos, ypos float
 	// construct mouse position proto
 
 	for _, lis := range g.cursorPositionListeners {
-		go lis(data.CursorPositionCommand{Xpos: xpos, Ypos: ypos})
+		go lis(components.CursorPositionCommand{Xpos: xpos, Ypos: ypos})
 	}
 
 }
