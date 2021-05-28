@@ -1,6 +1,7 @@
 package components
 
 import (
+	"image"
 	"reflect"
 	"testing"
 )

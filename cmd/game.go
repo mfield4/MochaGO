@@ -25,10 +25,9 @@ const (
 type Game struct {
 	window *glfw.Window
 
-	positions []components.Position
-	momentums []components.Momentum
-
-	camera []components.Camera
+	positions *[]components.Position
+	momentums *[]components.Momentum
+	camera    *[]components.Camera
 
 	// gameWorld *protos.GameWorld
 
@@ -42,8 +41,14 @@ func NewGame(width, height int) *Game {
 	// init opengl and stuffs
 	g := &Game{
 		window: initGlfw(width, height),
-		// gameState: &protos.GameState{},
-		// gameWorld: &protos.GameWorld{},
+		// Data
+		positions: &[]components.Position{},
+		momentums: &[]components.Momentum{},
+		camera:    &[]components.Camera{},
+		// Systems
+		inputs:    []systems.InputSystem{},
+		asyncs:    []systems.AsyncSystem{},
+		renderers: []systems.RenderSystem{},
 	}
 	initOpenGL()
 	// inputs
@@ -54,14 +59,14 @@ func NewGame(width, height int) *Game {
 	cameraSys := systems.NewCameraSystem(g.camera)
 	// rendering stuff
 	chunkRenderer := systems.NewChunkRenderer()
-	// skyboxRenderer := systems.NewSkyboxRenderer()
+	skyboxRenderer := systems.NewSkyboxRenderer()
 
 	glfwInput.AddMouseMotionListeners(cameraSys.MouseMotionCommand)
 	glfwInput.AddKeyListeners(cameraSys.KeyCommand)
 
 	g.addInputSystems(glfwInput, chunkManager)
 	g.addAsyncSystems(chunkManager)
-	g.addRenderSystems(chunkRenderer)
+	g.addRenderSystems(chunkRenderer, skyboxRenderer)
 	return g
 }
 
@@ -122,7 +127,7 @@ func initGlfw(width, height int) *glfw.Window {
 	}
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+	glfw.WindowHint(glfw.ContextVersionMinor, 2)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
@@ -132,6 +137,8 @@ func initGlfw(width, height int) *glfw.Window {
 	}
 	window.MakeContextCurrent()
 
+	// TODO CONFIGURE WINDOW SETTINGS
+	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
 	return window
 }
 
@@ -142,6 +149,7 @@ func initOpenGL() {
 	}
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Println("OpenGL version", version)
+
 	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
