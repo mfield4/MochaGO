@@ -24,8 +24,8 @@ type Camera struct {
 	VPUBO            rendering.Ubo
 }
 
-func NewCamera() Camera {
-	return Camera{
+func NewCamera() *Camera {
+	return &Camera{
 		Position:         mgl32.Vec3{0.0, 0.0, 0.0},
 		Front:            mgl32.Vec3{0.0, 0.0, -1.0},
 		Up:               mgl32.Vec3{0.0, 1.0, 0.0},
@@ -38,7 +38,7 @@ func NewCamera() Camera {
 		Zoom:             45,
 		VPUBO: func() rendering.Ubo {
 			vpUBO := rendering.NewViewProj(2)
-			vpUBO.SetMat4(mgl32.Perspective(mgl32.DegToRad(45), float32(1920)/float32(1080), 0.1, 1000), 0)
+			vpUBO.SetMat4(mgl32.Perspective(mgl32.DegToRad(45), float32(1920)/float32(1080), 0.1, 100), 0)
 			return vpUBO
 		}(),
 	}
@@ -49,6 +49,7 @@ func (c *Camera) GetViewMatrix() mgl32.Mat4 {
 	eye := c.Position
 	center := c.Position.Add(c.Front)
 	up := c.Up
+
 	return mgl32.LookAt(
 		eye.X(), eye.Y(), eye.Z(),
 		center.X(), center.Y(), center.Z(),

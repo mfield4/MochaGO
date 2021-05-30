@@ -2,9 +2,28 @@ package systems
 
 import (
 	"go_entity_component_services/pkg/components"
-	"reflect"
 	"testing"
 )
+
+func TestNewCameraSystem(t *testing.T) {
+	type args struct {
+		cams []components.Camera
+	}
+	tests := []struct {
+		name string
+		args args
+		want *CameraSystem
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// if got := NewCameraSystem(tt.args.cams); !reflect.DeepEqual(got, tt.want) {
+			// 	t.Errorf("NewCameraSystem() = %v, want %v", got, tt.want)
+			// }
+		})
+	}
+}
 
 func TestCameraSystem_KeyCommand(t *testing.T) {
 	type fields struct {
@@ -60,22 +79,25 @@ func TestCameraSystem_MouseMotionCommand(t *testing.T) {
 	}
 }
 
-func TestNewCameraSystem(t *testing.T) {
-	type args struct {
-		cams []components.Camera
+func TestCameraSystem_updateCameraVectors(t *testing.T) {
+	type fields struct {
+		cameras *[]components.Camera
+		deltaT  float64
+		lastT   float64
 	}
 	tests := []struct {
-		name string
-		args args
-		want *CameraSystem
+		name   string
+		fields fields
 	}{
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewCameraSystem(tt.args.cams); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewCameraSystem() = %v, want %v", got, tt.want)
-			}
+			// c := CameraSystem{
+			// 	cameras: tt.fields.cameras,
+			// 	deltaT:  tt.fields.deltaT,
+			// 	lastT:   tt.fields.lastT,
+			// }
 		})
 	}
 }

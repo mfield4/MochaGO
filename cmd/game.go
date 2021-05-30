@@ -19,7 +19,7 @@ type Game struct {
 
 	positions *[]components.Position
 	momentums *[]components.Momentum
-	camera    *[]components.Camera
+	camera    *[]*components.Camera
 
 	// gameWorld *protos.GameWorld
 
@@ -36,7 +36,7 @@ func NewGame(width, height int) *Game {
 		// Data
 		positions: &[]components.Position{},
 		momentums: &[]components.Momentum{},
-		camera:    &[]components.Camera{},
+		camera:    &[]*components.Camera{},
 		// Systems
 		inputs:    []systems.InputSystem{},
 		asyncs:    []systems.AsyncSystem{},
@@ -93,8 +93,11 @@ func (g *Game) Draw() {
 	gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 
 	// SET THE VIEW MATRIX TO CURRENTLY ACTIVE CAMERA
-	cam := &(*g.camera)[0]
-	cam.VPUBO.SetMat4(cam.GetViewMatrix(), 1)
+	cam := (*g.camera)[0]
+
+	view := cam.GetViewMatrix()
+
+	cam.VPUBO.SetMat4(view, 1)
 
 	for _, sys := range g.renderers {
 		// TODO DO TIME STUFF MANG

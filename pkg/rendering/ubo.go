@@ -26,6 +26,6 @@ func NewViewProj(size int) Ubo {
 
 func (u Ubo) SetMat4(value mgl32.Mat4, idx int) {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, u.uboID)
-	gl.BufferSubData(gl.UNIFORM_BUFFER, idx*u.stride, len(value)*4, gl.Ptr(&value[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, idx*u.stride, u.stride, gl.Ptr(&value[0]))
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 }

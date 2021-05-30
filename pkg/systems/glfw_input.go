@@ -10,6 +10,8 @@ type GlfwInput struct {
 	mouseButtonListeners    []func(components.MouseButtonCommand)
 	keyListeners            []func(components.KeyCommand)
 	cursorState             bool
+
+	lastX, lastY float64
 }
 
 // This type creates a set of callbacks to communicate between glfw and the rest of the program
@@ -52,9 +54,10 @@ func (g *GlfwInput) AddKeyListeners(funcs ...func(components.KeyCommand)) {
 func (g *GlfwInput) cursorPositionCallback(window *glfw.Window, xpos, ypos float64) {
 	// construct mouse position proto
 	for _, lis := range g.cursorPositionListeners {
-		go lis(components.CursorPositionCommand{Xpos: xpos, Ypos: ypos})
+		go lis(components.CursorPositionCommand{Xpos: xpos - g.lastX, Ypos: g.lastY - ypos})
 	}
-
+	g.lastX = xpos
+	g.lastY = ypos
 }
 
 func (g *GlfwInput) mouseButtonCallback(window *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
