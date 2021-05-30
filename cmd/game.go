@@ -1,29 +1,21 @@
+// Package game is meant to encapsulate the data and behavior used to to manage the game, it's window, and the renderer
 package main
 
 import (
-	"fmt"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"go_entity_component_services/pkg/components"
+	"go_entity_component_services/pkg/rendering"
 	"go_entity_component_services/pkg/systems"
-	"log"
-	"strings"
 )
 
 // The game struct holds all of the game datastructures.
 // Upon initialization, the game struct is responsible for initializing glfw and opengl
 
-const (
-	vertexShaderSource = `
-
-`
-	fragmentShaderSource = `
-
-`
-)
-
 type Game struct {
 	window *glfw.Window
+
+	entities *[]components.Entity
 
 	positions *[]components.Position
 	momentums *[]components.Momentum
@@ -40,7 +32,7 @@ type Game struct {
 func NewGame(width, height int) *Game {
 	// init opengl and stuffs
 	g := &Game{
-		window: initGlfw(width, height),
+		window: rendering.InitGlfw(width, height),
 		// Data
 		positions: &[]components.Position{},
 		momentums: &[]components.Momentum{},
@@ -50,7 +42,7 @@ func NewGame(width, height int) *Game {
 		asyncs:    []systems.AsyncSystem{},
 		renderers: []systems.RenderSystem{},
 	}
-	initOpenGL()
+	rendering.InitOpenGL()
 	// inputs
 	glfwInput := systems.NewGlfwInput(g.window)
 
@@ -58,7 +50,6 @@ func NewGame(width, height int) *Game {
 
 	cameraSys := systems.NewCameraSystem(g.camera)
 	// rendering stuff
-	chunkRenderer := systems.NewChunkRenderer()
 	skyboxRenderer := systems.NewSkyboxRenderer()
 
 	glfwInput.AddMouseMotionListeners(cameraSys.MouseMotionCommand)
@@ -66,7 +57,7 @@ func NewGame(width, height int) *Game {
 
 	g.addInputSystems(glfwInput, chunkManager)
 	g.addAsyncSystems(chunkManager)
-	g.addRenderSystems(chunkRenderer, skyboxRenderer)
+	g.addRenderSystems(skyboxRenderer)
 	return g
 }
 
@@ -95,11 +86,22 @@ func (g *Game) Update() {
 
 // Draw all objects on scene.
 func (g *Game) Draw() {
+	// TODO set view and projection matrix at the correct times via the ubo
+	// create ubo component and connect it to various entities
+
+	gl.ClearColor(0.1, 0.1, 0.1, 0.1)
+	gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+
+	// SET THE VIEW MATRIX TO CURRENTLY ACTIVE CAMERA
+	cam := &(*g.camera)[0]
+	cam.VPUBO.SetMat4(cam.GetViewMatrix(), 1)
 
 	for _, sys := range g.renderers {
 		// TODO DO TIME STUFF MANG
 		sys.Render(0)
 	}
+
+	g.window.SwapBuffers()
 }
 
 func (g *Game) addInputSystems(inputs ...systems.InputSystem) {
@@ -118,63 +120,4 @@ func (g *Game) addRenderSystems(renderers ...systems.RenderSystem) {
 	for _, sys := range renderers {
 		g.renderers = append(g.renderers, sys)
 	}
-}
-
-// initGlfw initializes glfw and returns a Window to use.
-func initGlfw(width, height int) *glfw.Window {
-	if err := glfw.Init(); err != nil {
-		panic(err)
-	}
-	glfw.WindowHint(glfw.Resizable, glfw.False)
-	glfw.WindowHint(glfw.ContextVersionMajor, 4)
-	glfw.WindowHint(glfw.ContextVersionMinor, 2)
-	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-
-	window, err := glfw.CreateWindow(width, height, "", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-	window.MakeContextCurrent()
-
-	// TODO CONFIGURE WINDOW SETTINGS
-	window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
-	return window
-}
-
-// initOpenGL initializes OpenGL and returns an intiialized program.
-func initOpenGL() {
-	if err := gl.Init(); err != nil {
-		panic(err)
-	}
-	version := gl.GoStr(gl.GetString(gl.VERSION))
-	log.Println("OpenGL version", version)
-
-	// Configure global settings
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LESS)
-	gl.ClearColor(1.0, 1.0, 1.0, 1.0)
-}
-
-func compileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
-
-	csources, free := gl.Strs(source)
-	gl.ShaderSource(shader, 1, csources, nil)
-	free()
-	gl.CompileShader(shader)
-
-	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
-	}
-
-	return shader, nil
 }

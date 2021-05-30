@@ -3,7 +3,10 @@ package systems
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
 	"go_entity_component_services/pkg/components"
+	"log"
+	"math"
 )
 
 // Handles basic camera movement and updating the camera with information
@@ -15,25 +18,14 @@ type CameraSystem struct {
 }
 
 func NewCameraSystem(cams *[]components.Camera) *CameraSystem {
-	*cams = append(*cams, components.Camera{
-		Position:         mgl32.Vec3{},
-		Front:            mgl32.Vec3{0.0, 0.0, -1.0},
-		Up:               mgl32.Vec3{0.0, 1.0, 0.0},
-		Right:            mgl32.Vec3{1.0, 0.0, 0.0},
-		WorldUp:          mgl32.Vec3{0.0, 1.0, 0.0},
-		Yaw:              0,
-		Pitch:            0,
-		MovementSpeed:    0.05,
-		MouseSensitivity: 0.05,
-		Zoom:             45,
-	})
+	*cams = append(*cams, components.NewCamera())
 	return &CameraSystem{
 		cameras: cams,
 	}
 }
 
 func (c *CameraSystem) MouseMotionCommand(mouse components.CursorPositionCommand) {
-	cam := (*c.cameras)[0]
+	cam := &(*c.cameras)[0]
 
 	// update camera vectors
 	const sensitivity = 0.05
@@ -50,11 +42,12 @@ func (c *CameraSystem) MouseMotionCommand(mouse components.CursorPositionCommand
 		cam.Pitch = -89.0
 	}
 
-	cam.UpdateCameraVectors()
+	log.Printf("Print the camera my man : %v\n", cam)
+	c.updateCameraVectors()
 }
 
 func (c *CameraSystem) KeyCommand(key components.KeyCommand) {
-	cam := (*c.cameras)[0]
+	cam := &(*c.cameras)[0]
 	// Update DeltaT
 	currT := glfw.GetTime()
 	velocity := float32(cam.MovementSpeed * (currT - c.lastT))
@@ -70,4 +63,19 @@ func (c *CameraSystem) KeyCommand(key components.KeyCommand) {
 	case glfw.KeyD:
 		cam.Position = cam.Position.Add(cam.Right.Mul(velocity))
 	}
+
+	// c.updateCameraVectors()
+}
+
+func (c CameraSystem) updateCameraVectors() {
+	cam := &(*c.cameras)[0]
+	x := float32(math.Cos(mgl64.DegToRad(cam.Yaw)) * math.Cos(mgl64.DegToRad(cam.Pitch)))
+	y := float32(math.Sin(mgl64.DegToRad(cam.Pitch)))
+	z := float32(math.Sin(mgl64.DegToRad(cam.Yaw)) * math.Cos(mgl64.DegToRad(cam.Pitch)))
+	front := mgl32.Vec3{x, y, z}
+	front = front.Normalize()
+	// Also re-calculate the Right and Up vector
+	// Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+	cam.Right = front.Cross(cam.WorldUp).Normalize()
+	cam.Up = cam.Right.Cross(cam.Front).Normalize()
 }

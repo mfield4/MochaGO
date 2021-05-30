@@ -1,8 +1,9 @@
-package components
+package rendering
 
 import (
 	"fmt"
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 	"io/ioutil"
 	"log"
 	"os"
@@ -43,6 +44,46 @@ func NewShader(vertFile, fragFile, geomFile string) (Shader, error) {
 	return shader, nil
 }
 
+func (s Shader) Use() {
+	gl.UseProgram(s.Program)
+}
+
+func (s *Shader) SetInt32(name string, value int32) {
+	gl.Uniform1i(s.Uniforms[name], value)
+}
+
+func (s Shader) SetFloat32(name string, value float32) {
+	gl.Uniform1f(s.Uniforms[name], value)
+}
+
+func (s Shader) SetFloat64(name string, value float64) {
+	gl.Uniform1d(s.Uniforms[name], value)
+}
+
+func (s Shader) SetVec2(name string, value mgl32.Vec2) {
+	gl.Uniform2f(s.Uniforms[name], value.X(), value.Y())
+}
+
+func (s Shader) SetVec3(name string, value mgl32.Vec3) {
+	gl.Uniform3f(s.Uniforms[name], value.X(), value.Y(), value.Z())
+}
+
+func (s Shader) SetVec4(name string, value mgl32.Vec4) {
+	gl.Uniform4f(s.Uniforms[name], value.X(), value.Y(), value.Z(), value.W())
+}
+
+func (s Shader) SetMat2(name string, value mgl32.Mat2) {
+	gl.UniformMatrix2fv(s.Uniforms[name], 1, false, &value[0])
+}
+
+func (s Shader) SetMat3(name string, value mgl32.Mat3) {
+	gl.UniformMatrix3fv(s.Uniforms[name], 1, false, &value[0])
+}
+
+func (s Shader) SetMat4(name string, value mgl32.Mat4) {
+	gl.UniformMatrix4fv(s.Uniforms[name], 1, false, &value[0])
+}
+
 func (s *Shader) Delete() {
 	gl.DeleteProgram(s.Program)
 }
@@ -53,13 +94,16 @@ func setupShader(program uint32) Shader {
 		i uint32
 	)
 	gl.UseProgram(program)
-	uniforms := make(map[string]int32)
-	attributes := map[string]uint32{} //make(map[string]uint32)
+	uniforms := map[string]int32{}
+	attributes := map[string]uint32{} // make(map[string]uint32)
+
+	var size int32
+	var xtype uint32
 
 	gl.GetProgramiv(program, gl.ACTIVE_UNIFORMS, &c)
 	for i = 0; i < uint32(c); i++ {
 		var buf [256]byte
-		gl.GetActiveUniform(program, i, 256, nil, nil, nil, &buf[0])
+		gl.GetActiveUniform(program, i, 256, nil, &size, &xtype, &buf[0])
 		loc := gl.GetUniformLocation(program, &buf[0])
 		name := gl.GoStr(&buf[0])
 		uniforms[name] = loc
@@ -68,7 +112,7 @@ func setupShader(program uint32) Shader {
 	gl.GetProgramiv(program, gl.ACTIVE_ATTRIBUTES, &c)
 	for i = 0; i < uint32(c); i++ {
 		var buf [256]byte
-		gl.GetActiveAttrib(program, i, 256, nil, nil, nil, &buf[0])
+		gl.GetActiveAttrib(program, i, 256, nil, &size, &xtype, &buf[0])
 		loc := gl.GetAttribLocation(program, &buf[0])
 		name := gl.GoStr(&buf[0])
 		attributes[name] = uint32(loc)

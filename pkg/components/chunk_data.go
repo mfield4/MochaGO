@@ -1,5 +1,9 @@
 package components
 
+import (
+	"go_entity_component_services/pkg/rendering"
+)
+
 const (
 	CHUNK_SIZE = 16
 )
@@ -11,7 +15,7 @@ type Chunk struct {
 }
 
 func NewChunk() *Chunk {
-	vao, vbo := InitNilVBOTex(1000)
+	vao, vbo := rendering.InitNilVBOTex(1000)
 
 	return &Chunk{
 		Cubes:        [16][16][16]Cube{},
@@ -22,7 +26,7 @@ func NewChunk() *Chunk {
 }
 
 func NewChunkWithCubes(cubes [CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE]Cube) *Chunk {
-	vao, vbo := InitNilVBOTex(len(cubes))
+	vao, vbo := rendering.InitNilVBOTex(len(cubes))
 
 	return &Chunk{
 		Cubes:        cubes,

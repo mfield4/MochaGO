@@ -30,7 +30,57 @@ type Cube struct {
 	ActiveFaces FACES
 }
 
-func CubeVerticies() [180]float32 {
+func CubeVertices() [108]float32 {
+	// 3 floats per vertex
+	// 6 vertices
+	// 6 faces
+	return [108]float32{
+		// Back face
+		-0.5, -0.5, -0.5, // Bottom-let
+		0.5, 0.5, -0.5, // top-right
+		0.5, -0.5, -0.5, // bottom-right
+		0.5, 0.5, -0.5, // top-right
+		-0.5, -0.5, -0.5, // bottom-let
+		-0.5, 0.5, -0.5, // top-let
+		// ront ace
+		-0.5, -0.5, 0.5, // bottom-let
+		0.5, -0.5, 0.5, // bottom-right
+		0.5, 0.5, 0.5, // top-right
+		0.5, 0.5, 0.5, // top-right
+		-0.5, 0.5, 0.5, // top-let
+		-0.5, -0.5, 0.5, // bottom-let
+		// Let ace
+		-0.5, 0.5, 0.5, // top-right
+		-0.5, 0.5, -0.5, // top-let
+		-0.5, -0.5, -0.5, // bottom-let
+		-0.5, -0.5, -0.5, // bottom-let
+		-0.5, -0.5, 0.5, // bottom-right
+		-0.5, 0.5, 0.5, // top-right
+		// Right ace
+		0.5, 0.5, 0.5, // top-let
+		0.5, -0.5, -0.5, // bottom-right
+		0.5, 0.5, -0.5, // top-right
+		0.5, -0.5, -0.5, // bottom-right
+		0.5, 0.5, 0.5, // top-let
+		0.5, -0.5, 0.5, // bottom-let
+		// Bottom ace
+		-0.5, -0.5, -0.5, // top-right
+		0.5, -0.5, -0.5, // top-let
+		0.5, -0.5, 0.5, // bottom-let
+		0.5, -0.5, 0.5, // bottom-let
+		-0.5, -0.5, 0.5, // bottom-right
+		-0.5, -0.5, -0.5, // top-right
+		// Top ace
+		-0.5, 0.5, -0.5, // top-let
+		0.5, 0.5, 0.5, // bottom-right
+		0.5, 0.5, -0.5, // top-right
+		0.5, 0.5, 0.5, // bottom-right
+		-0.5, 0.5, -0.5, // top-let
+		-0.5, 0.5, 0.5, // bottom-let
+	}
+}
+
+func CubeVerticesTex() [180]float32 {
 
 	// 5 floats per vertex
 	// 6 vertices per face

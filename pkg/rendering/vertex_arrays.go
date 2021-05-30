@@ -1,4 +1,4 @@
-package components
+package rendering
 
 import "github.com/go-gl/gl/v4.1-core/gl"
 
@@ -45,7 +45,7 @@ func InitVBO(points []float32, attrs []Attribute) (vao, vbo uint32) {
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 
 	// pos vertex
-	EnableAttributes(vao, vbo, attrs)
+	enableAttributes(vao, vbo, attrs)
 
 	return vao, vbo
 }
@@ -63,14 +63,14 @@ func InitNilVBO(bufLen int, attrs []Attribute) (vao, vbo uint32) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, 4*bufLen, nil, gl.STATIC_DRAW)
 
-	EnableAttributes(vao, vbo, attrs)
+	enableAttributes(vao, vbo, attrs)
 
 	return vao, vbo
 }
 
-// EnableAttributes iterates through the given attributes and enables them for the given vao and vbo
+// enableAttributes iterates through the given attributes and enables them for the given vao and vbo
 // Assumes that both the vao and the vbo are bound
-func EnableAttributes(vao, vbo uint32, attributes []Attribute) {
+func enableAttributes(vao, vbo uint32, attributes []Attribute) {
 	gl.BindVertexArray(vao)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 

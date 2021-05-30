@@ -1,10 +1,12 @@
-package components
+package rendering
 
 import (
 	"fmt"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"image"
 	"image/draw"
+	_ "image/jpeg"
+	_ "image/png"
 	"log"
 	"os"
 )
@@ -13,7 +15,7 @@ func NewTextureD(file string) (uint32, error) {
 	return NewTexture(gl.REPEAT, gl.REPEAT, gl.LINEAR, gl.LINEAR, file)
 }
 
-func NewTexture(wrap_s, wrap_t, min_f, mag_f int32, file string) (uint32, error) {
+func NewTexture(wrapS, wrapT, minF, magF int32, file string) (uint32, error) {
 	rgba, _ := imageToPixelData(file)
 
 	var texture uint32
@@ -21,11 +23,11 @@ func NewTexture(wrap_s, wrap_t, min_f, mag_f int32, file string) (uint32, error)
 	// gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
 
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap_s)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap_t)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT)
 
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, min_f)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, mag_f)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minF)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magF)
 
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
@@ -48,16 +50,16 @@ func NewCubeMapD(faces [6]string) (uint32, error) {
 	return NewCubeMap(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.LINEAR, gl.LINEAR, faces)
 }
 
-func NewCubeMap(wrap_s, wrap_t, wrap_r, min_f, mag_f int32, faces [6]string) (cubeMapId uint32, err error) {
+func NewCubeMap(wrapS, wrapT, wrapR, minF, magF int32, faces [6]string) (cubeMapId uint32, err error) {
 	gl.GenTextures(1, &cubeMapId)
 	gl.BindTexture(gl.TEXTURE_CUBE_MAP, cubeMapId)
 
-	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrap_s)
-	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrap_t)
-	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, wrap_r)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, wrapR)
 
-	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, min_f)
-	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, mag_f)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minF)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magF)
 
 	for idx, f := range faces {
 		rgba, err := imageToPixelData(f)
@@ -73,11 +75,9 @@ func NewCubeMap(wrap_s, wrap_t, wrap_r, min_f, mag_f int32, faces [6]string) (cu
 			int32(rgba.Rect.Size().X),
 			int32(rgba.Rect.Size().Y),
 			0,
-			gl.RGB,
+			gl.RGBA,
 			gl.UNSIGNED_BYTE,
 			gl.Ptr(rgba.Pix))
-
-		gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	}
 
 	gl.BindTexture(gl.TEXTURE_CUBE_MAP, 0)

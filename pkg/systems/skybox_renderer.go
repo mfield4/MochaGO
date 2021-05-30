@@ -3,6 +3,7 @@ package systems
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"go_entity_component_services/pkg/components"
+	"go_entity_component_services/pkg/rendering"
 	"log"
 )
 
@@ -10,16 +11,16 @@ type SkyboxRenderer struct {
 	skyboxID             uint32
 	skyboxVAO, skyboxVBO uint32
 
-	skyboxShader components.Shader
+	skyboxShader rendering.Shader
 }
 
 func NewSkyboxRenderer() *SkyboxRenderer {
-	v := components.CubeVerticies()
-	vao, vbo := components.InitVBOPos((v)[:])
+	v := components.CubeVertices()
+	vao, vbo := rendering.InitVBOPos((v)[:])
 
 	return &SkyboxRenderer{
 		skyboxID: func() uint32 {
-			mapID, err := components.NewCubeMapD([6]string{
+			mapID, err := rendering.NewCubeMapD([6]string{
 				"resources/textures/skybox/right.jpg",
 				"resources/textures/skybox/left.jpg",
 				"resources/textures/skybox/top.jpg",
@@ -36,12 +37,18 @@ func NewSkyboxRenderer() *SkyboxRenderer {
 		}(),
 		skyboxVAO: vao,
 		skyboxVBO: vbo,
-		skyboxShader: func() components.Shader {
-			shader, err := components.NewShader("shaders/skybox.vert", "shaders/skybox.vert", "")
+		skyboxShader: func() rendering.Shader {
+			shader, err := rendering.NewShader("shaders/skybox.vert", "shaders/skybox.frag", "")
 			if err != nil {
 				log.Fatalf("Failed to create skybox %v\n", err)
-				return components.Shader{}
+				return rendering.Shader{}
 			}
+
+			uniIdx := gl.GetUniformBlockIndex(shader.Program, gl.Str("Matrices\x00"))
+			gl.UniformBlockBinding(shader.Program, uniIdx, 0)
+
+			shader.Use()
+			shader.SetInt32("skybox", 0)
 
 			return shader
 		}(),
@@ -50,7 +57,7 @@ func NewSkyboxRenderer() *SkyboxRenderer {
 
 func (s *SkyboxRenderer) Render(dt float32) {
 	// RENDER MY CUBE
-	gl.UseProgram(s.skyboxShader.Program)
+	s.skyboxShader.Use()
 
 	gl.DepthFunc(gl.LEQUAL)
 	gl.BindVertexArray(s.skyboxVAO)

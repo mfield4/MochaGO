@@ -14,8 +14,8 @@ func TestCubeVerticies(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CubeVerticies(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CubeVerticies() = %v, want %v", got, tt.want)
+			if got := CubeVertices(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CubeVertices() = %v, want %v", got, tt.want)
 			}
 		})
 	}

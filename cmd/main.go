@@ -10,10 +10,10 @@ func init() {
 }
 
 func main() {
-	game := NewGame(1920, 1080)
-	game.Start()
-	for game.IsRunning() {
-		game.Update()
-		game.Draw()
+	myGame := NewGame(1920, 1080)
+	myGame.Start()
+	for myGame.IsRunning() {
+		myGame.Update()
+		myGame.Draw()
 	}
 }

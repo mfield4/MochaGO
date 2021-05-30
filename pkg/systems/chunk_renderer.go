@@ -10,5 +10,5 @@ func NewChunkRenderer() *ChunkRenderer {
 }
 
 func (c *ChunkRenderer) Render(dt float32) {
-	panic("implement me")
+	// panic("implement me")
 }
