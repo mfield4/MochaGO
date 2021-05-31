@@ -7,6 +7,7 @@ import (
 	"go_entity_component_services/pkg/components"
 	"go_entity_component_services/pkg/rendering"
 	"go_entity_component_services/pkg/systems"
+	"log"
 )
 
 // The game struct holds all of the game datastructures.
@@ -15,11 +16,7 @@ import (
 type Game struct {
 	window *glfw.Window
 
-	entities *[]components.Entity
-
-	positions *[]components.Position
-	momentums *[]components.Momentum
-	camera    *[]*components.Camera
+	em *components.EntityManager
 
 	// gameWorld *protos.GameWorld
 
@@ -34,9 +31,7 @@ func NewGame(width, height int) *Game {
 	g := &Game{
 		window: rendering.InitGlfw(width, height),
 		// Data
-		positions: &[]components.Position{},
-		momentums: &[]components.Momentum{},
-		camera:    &[]*components.Camera{},
+		em: components.NewEntityManager(),
 		// Systems
 		inputs:    []systems.InputSystem{},
 		asyncs:    []systems.AsyncSystem{},
@@ -48,7 +43,7 @@ func NewGame(width, height int) *Game {
 
 	chunkManager := systems.NewChunkManager()
 
-	cameraSys := systems.NewCameraSystem(g.camera)
+	cameraSys := systems.NewCameraSystem(g.em)
 	// rendering stuff
 	skyboxRenderer := systems.NewSkyboxRenderer()
 
@@ -93,10 +88,8 @@ func (g *Game) Draw() {
 	gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 
 	// SET THE VIEW MATRIX TO CURRENTLY ACTIVE CAMERA
-	cam := (*g.camera)[0]
-
+	cam := g.getActiveCam()
 	view := cam.GetViewMatrix()
-
 	cam.VPUBO.SetMat4(view, 1)
 
 	for _, sys := range g.renderers {
@@ -123,4 +116,13 @@ func (g *Game) addRenderSystems(renderers ...systems.RenderSystem) {
 	for _, sys := range renderers {
 		g.renderers = append(g.renderers, sys)
 	}
+}
+
+func (g *Game) getActiveCam() *components.Camera {
+	for _, v := range g.em.Cameras {
+		return v
+	}
+
+	log.Fatalln("No active camera")
+	return &components.Camera{}
 }

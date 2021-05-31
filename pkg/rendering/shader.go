@@ -88,6 +88,12 @@ func (s *Shader) Delete() {
 	gl.DeleteProgram(s.Program)
 }
 
+/*
+
+Shader setup code taken from https://github.com/raedatoui/glutils/
+
+*/
+
 func setupShader(program uint32) Shader {
 	var (
 		c int32

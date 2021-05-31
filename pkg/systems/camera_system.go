@@ -2,28 +2,28 @@ package systems
 
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/go-gl/mathgl/mgl64"
 	"go_entity_component_services/pkg/components"
-	"math"
 )
 
 // Handles basic camera movement and updating the camera with information
 
 type CameraSystem struct {
-	cameras *[]*components.Camera
+	cam     components.Entity
+	cameras map[components.Entity]*components.Camera
 	deltaT  float64
 	lastT   float64
 }
 
-func NewCameraSystem(cams *[]*components.Camera) *CameraSystem {
-	*cams = append(*cams, components.NewCamera())
+func NewCameraSystem(em *components.EntityManager) *CameraSystem {
+
 	return &CameraSystem{
-		cameras: cams,
+		cam:     em.NewEntity(components.NewCamera()),
+		cameras: em.Cameras,
 	}
 }
 
 func (c *CameraSystem) MouseMotionCommand(mouse components.CursorPositionCommand) {
-	cam := (*c.cameras)[0]
+	cam := c.cameras[c.cam]
 
 	// update camera vectors
 	const sensitivity = 0.5
@@ -40,11 +40,12 @@ func (c *CameraSystem) MouseMotionCommand(mouse components.CursorPositionCommand
 		cam.Pitch = -89.0
 	}
 
-	c.updateCameraVectors()
+	cam.UpdateVectors()
 }
 
 func (c *CameraSystem) KeyCommand(key components.KeyCommand) {
-	cam := (*c.cameras)[0]
+	cam := c.cameras[c.cam]
+
 	// Update DeltaT
 	currT := glfw.GetTime()
 	velocity := float32(cam.MovementSpeed * (currT - c.lastT))
@@ -61,20 +62,5 @@ func (c *CameraSystem) KeyCommand(key components.KeyCommand) {
 		cam.Position = cam.Position.Add(cam.Right.Mul(velocity))
 	}
 
-	// c.updateCameraVectors()
-}
-
-func (c CameraSystem) updateCameraVectors() {
-	cam := (*c.cameras)[0]
-	x := float32(math.Cos(mgl64.DegToRad(cam.Yaw)) * math.Cos(mgl64.DegToRad(cam.Pitch)))
-	y := float32(math.Sin(mgl64.DegToRad(cam.Pitch)))
-	z := float32(math.Sin(mgl64.DegToRad(cam.Yaw)) * math.Cos(mgl64.DegToRad(cam.Pitch)))
-	cam.Front[0] = x
-	cam.Front[1] = y
-	cam.Front[2] = z
-	cam.Front = cam.Front.Normalize()
-	// Also re-calculate the Right and Up vector
-	// // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-	cam.Right = cam.Front.Cross(cam.WorldUp).Normalize()
-	cam.Up = cam.Right.Cross(cam.Front).Normalize()
+	cam.UpdateVectors()
 }
