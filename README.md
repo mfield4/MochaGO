@@ -1,2 +1,2 @@
 # MochaGO
-Small game engine written in golang. Depends on opengl and glfw
+Small 3D game engine written in golang. Depends on opengl and glfw
